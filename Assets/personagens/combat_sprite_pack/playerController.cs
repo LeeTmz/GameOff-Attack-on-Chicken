@@ -2,99 +2,68 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class playerController : MonoBehaviour {
+public class playerController : MonoBehaviour 
+{
 
-    private Rigidbody2D body;
-    public float runSpeed = 10;
-    public BoxCollider2D colisor;
-    public LayerMask ground;
-    public float jumpForce = 20;
-    private Animator animator;
-    private SpriteRenderer sprite;
-    private float tempoIdle;
+    [Header("Move config")]
+    [SerializeField] private float speed;
 
-    private bool isGrounded;
-    public Transform groundCheck;
-    public float checkRadius;
-    public LayerMask whatIsGround;
 
-    private int extrajumps;
-    public int extraJampsValue;
+	[Header("Jump config")]
+	 private float maxHeight = 2;
+	 private float jumpSpeed;
+	 private float timeToPeak = 1f;
 
-    // Use this for initialization
-    void Start () {
-        extrajumps = extraJampsValue;
+	 CharacterController controller;
 
-        body = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
-        sprite = GetComponent<SpriteRenderer>();
+
+	Vector2 xVelocity;
+	Vector2 yVelocity;
+	Vector2 finalVelocity;
+
+	float gravity;
+
+	private void Start()
+	{
+		controller = GetComponent<CharacterController>();
+
+		//Gravity
+		gravity = (2 * maxHeight) / Mathf.Pow(timeToPeak, 2);
+
+		jumpSpeed = gravity * timeToPeak;
+	}
+	private void Update()
+	{
+		if (controller.isGrounded) yVelocity = Vector2.down;
+
+		MovePlayer();
+		Gravity();
+
+
+
+		if(Input.GetKeyDown(KeyCode.Space) && controller.isGrounded) 
+		{
+			JumpPlayer();
+		}
+
+		finalVelocity = xVelocity + yVelocity;
+
+		controller.Move(finalVelocity * Time.deltaTime);
 	}
 
-    // Update is called once per frame
-    void Update() {
+	void MovePlayer() 
+	{
+		float xInput = Input.GetAxis("Horizontal");
 
-        GetForwardInput();
-        GetJumpInput();
+		xVelocity = speed * xInput * Vector2.right;		
+	}
 
-
-        if (isGrounded == true)
-        {
-            extrajumps = extraJampsValue;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space) && extrajumps > 0)
-        {
-
-            body.velocity = Vector2.up * jumpForce;
-            extrajumps--;
-
-        }
-        else if (Input.GetKeyDown(KeyCode.Space) && extrajumps == 0 && isGrounded == true)
-        {
-            body.velocity = Vector2.up * jumpForce;
-        }
-
-
-
-    }
-
-    private void FixedUpdate()
-    {
-
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, checkRadius, whatIsGround);
-
-       
-    }
-
-
-    private void GetForwardInput()
-    {
-        
-            body.velocity = new Vector2(Input.GetAxis("Horizontal") * runSpeed, body.velocity.y);
-        
-
-        animator.SetFloat("xSpeed", Mathf.Abs(body.velocity.x));
-        if (!sprite.flipX && body.velocity.x < 0)
-        {
-            sprite.flipX = true;
-        }
-        else if(sprite.flipX && body.velocity.x > 0)
-        {
-            sprite.flipX = false;
-        }
-            
-    }
-    private void GetJumpInput()
-    {
-
-        if (Input.GetButtonDown("Jump"))
-        {
-
-            body.AddForce(Vector2.up * jumpForce);
-           
-            
-        }
-        
-    }
-    
+	void Gravity() 
+	{
+		yVelocity += gravity * Time.deltaTime * Vector2.down;
+	}
+	void JumpPlayer() 
+	{
+		yVelocity = jumpSpeed * Vector2.up;
+	}
 }

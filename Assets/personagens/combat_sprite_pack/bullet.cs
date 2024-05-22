@@ -10,13 +10,15 @@ public class bullet : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		rb.velocity = transform.right * speed; 	
-		
+		rb.velocity = transform.right * speed;
+		Destroy(gameObject, 5);
 	}
     void OnTriggerEnter2D(Collider2D col)
     {
 
         Destroy(gameObject);
     }
+
+	
 
 }

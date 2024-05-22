@@ -5,22 +5,34 @@ using UnityEngine;
 public class weapon : MonoBehaviour {
 
 	public Transform firePoint;
-	public GameObject bulletPrefabs;
+	public GameObject bulletPrefab;
 
-	// Update is called once per frame
+	public float fireRate = 0.1f;
+	public float bulletSpeed = 20f;
+
+	private bool isShooting = false;
+	private float nextFireTime = 0f;
 	void Update () {
 
-		if (Input.GetButtonDown ("Fire1")) {
+		if (Input.GetMouseButtonDown(0))
+		{
+			isShooting = true;
+		}
 
-			shoot ();
+		if (Input.GetMouseButtonUp(0))
+		{
+			isShooting = false;
+		}
 
+		if (isShooting && Time.time >= nextFireTime)
+		{
+			Shoot();
+			nextFireTime = Time.time + fireRate;
 		}
 	}
-
-	void shoot(){
-
-		Instantiate (bulletPrefabs, firePoint.position, firePoint.rotation);
+	void Shoot()
+	{
+		GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);		
 	}
-
 
 }
